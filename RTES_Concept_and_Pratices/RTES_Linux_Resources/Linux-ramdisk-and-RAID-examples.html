@@ -1,0 +1,363 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body><h3>Helpful Hints on Using Linux RAM disk, MDADM Software RAID</h3>
+<pre>RAMDISK with ext2 filesystem:
+mke2fs -m 0 /dev/ram0
+mount /dev/ram0 /mnt/rd1
+mke2fs -m 0 /dev/ram1
+mount /dev/ram1 /mnt/rd2
+mke2fs -m 0 /dev/ram2
+mount /dev/ram2 /mnt/rd3
+mke2fs -m 0 /dev/ram3
+mount /dev/ram3 /mnt/rd4
+mke2fs -m 0 /dev/ram4
+mount /dev/ram4 /mnt/rd5
+mke2fs -m 0 /dev/ram5
+mount /dev/ram5 /mnt/rd6
+
+For SW RAID:
+mdadm --create /dev/md0 --chunk=4 --layout=right-asymmetric --level=1 --raid-devices=2 /dev/ram0 /dev/ram1
+mke2fs -m 0 /dev/md0
+mount /dev/md0 /mnt/r1
+
+DD testing:
+dd if=/dev/zero of=/mnt/rd1/newfile bs=64k count=100
+
+SW RAID testing:
+[root@localhost r1]# cat /proc/mdstat
+Personalities : [raid1] 
+md0 : active raid1 ram1[1] ram0[0]
+      16320 blocks [2/2] [UU]
+      
+unused devices: <none>
+[root@localhost r1]# 
+
+[root@localhost r1]# mdadm --detail /dev/md0
+/dev/md0:
+        Version : 00.90.03
+  Creation Time : Sat May 10 00:47:22 2008
+     Raid Level : raid1
+     Array Size : 16320 (15.94 MiB 16.71 MB)
+  Used Dev Size : 16320 (15.94 MiB 16.71 MB)
+   Raid Devices : 2
+  Total Devices : 2
+Preferred Minor : 0
+    Persistence : Superblock is persistent
+
+    Update Time : Sat May 10 00:59:34 2008
+          State : clean
+ Active Devices : 2
+Working Devices : 2
+ Failed Devices : 0
+  Spare Devices : 0
+
+           UUID : 1f0e5e8e:9b47c52d:6d4724ce:92d48e8b
+         Events : 0.4
+
+    Number   Major   Minor   RaidDevice State
+       0       1        0        0      active sync   /dev/ram0
+       1       1        1        1      active sync   /dev/ram
+[root@localhost r1]# 
+
+[root@localhost r1]# mdadm --manage --set-faulty /dev/md0 /dev/ram0
+mdadm: set /dev/ram0 faulty in /dev/md0
+
+[root@localhost r1]# mdadm --detail /dev/md0
+/dev/md0:
+        Version : 00.90.03
+  Creation Time : Sat May 10 00:47:22 2008
+     Raid Level : raid1
+     Array Size : 16320 (15.94 MiB 16.71 MB)
+  Used Dev Size : 16320 (15.94 MiB 16.71 MB)
+   Raid Devices : 2
+  Total Devices : 2
+Preferred Minor : 0
+    Persistence : Superblock is persistent
+
+    Update Time : Sat May 10 01:06:42 2008
+          State : clean, degraded
+ Active Devices : 1
+Working Devices : 1
+ Failed Devices : 1
+  Spare Devices : 0
+
+           UUID : 1f0e5e8e:9b47c52d:6d4724ce:92d48e8b
+         Events : 0.6
+
+    Number   Major   Minor   RaidDevice State
+       0       0        0        0      removed
+       1       1        1        1      active sync   /dev/ram
+
+       2       1        0        -      faulty spare   /dev/ram0
+[root@localhost r1]# 
+
+d1: raid set md0 active with 2 out of 2 mirrors
+md: resync of RAID array md0
+md: minimum _guaranteed_  speed: 1000 KB/sec/disk.
+md: using maximum available idle IO bandwidth (but not more than 200000 KB/sec) for resync.
+md: using 128k window, over a total of 16320 blocks.
+md: md0: resync done.
+RAID1 conf printout:
+ --- wd:2 rd:2
+ disk 0, wo:0, o:1, dev:ram0
+ disk 1, wo:0, o:1, dev:ram1
+raid1: Disk failure on ram0, disabling device. 
+        Operation continuing on 1 devices
+RAID1 conf printout:
+ --- wd:1 rd:2
+ disk 0, wo:1, o:0, dev:ram0
+ disk 1, wo:0, o:1, dev:ram1
+RAID1 conf printout:
+ --- wd:1 rd:2
+ disk 1, wo:0, o:1, dev:ram1
+[root@localhost r1]# 
+
+WRITE TEST IN DEGRADED MODE:
+[root@localhost mnt]# dd if=/dev/zero of=/mnt/r1/newfile2 bs=64k count=100
+100+0 records in
+100+0 records out
+6553600 bytes (6.6 MB) copied, 0.0162858 s, 402 MB/s
+
+RECOVER:
+[root@localhost mnt]# mdadm /dev/md0 -r /dev/ram0
+mdadm: hot removed /dev/ram0
+[root@localhost mnt]# mdadm --detail /dev/md0
+/dev/md0:
+        Version : 00.90.03
+  Creation Time : Sat May 10 00:47:22 2008
+     Raid Level : raid1
+     Array Size : 16320 (15.94 MiB 16.71 MB)
+  Used Dev Size : 16320 (15.94 MiB 16.71 MB)
+   Raid Devices : 2
+  Total Devices : 1
+Preferred Minor : 0
+    Persistence : Superblock is persistent
+
+    Update Time : Sat May 10 01:20:20 2008
+          State : clean, degraded
+ Active Devices : 1
+Working Devices : 1
+ Failed Devices : 0
+  Spare Devices : 0
+
+[root@localhost mnt]# mdadm /dev/md0 -a /dev/ram0
+mdadm: added /dev/ram0
+[root@localhost mnt]# mdadm --detail /dev/md0
+/dev/md0:
+        Version : 00.90.03
+  Creation Time : Sat May 10 00:47:22 2008
+     Raid Level : raid1
+     Array Size : 16320 (15.94 MiB 16.71 MB)
+  Used Dev Size : 16320 (15.94 MiB 16.71 MB)
+   Raid Devices : 2
+  Total Devices : 2
+Preferred Minor : 0
+    Persistence : Superblock is persistent
+
+    Update Time : Sat May 10 01:22:11 2008
+          State : clean
+ Active Devices : 2
+Working Devices : 2
+ Failed Devices : 0
+  Spare Devices : 0
+
+           UUID : 1f0e5e8e:9b47c52d:6d4724ce:92d48e8b
+         Events : 0.24
+
+    Number   Major   Minor   RaidDevice State
+       0       1        0        0      active sync   /dev/ram0
+       1       1        1        1      active sync   /dev/ram
+[root@localhost mnt]# 
+
+
+           UUID : 1f0e5e8e:9b47c52d:6d4724ce:92d48e8b
+         Events : 0.16
+
+    Number   Major   Minor   RaidDevice State
+       0       0        0        0      removed
+       1       1        1        1      active sync   /dev/ram
+[root@localhost mnt]# 
+</none></pre>
+<h3>Helpful Hints on Using LVM</h3>
+<pre>CREATE PV (Physical Volumes) from RAM disk or drives with "pvcreate /dev/ram0" to place meta-data to manage this volume on it.
+Verify this with "pvs" or "pvdisplay".
+
+[root@localhost ~]# pvs
+  PV         VG       Fmt  Attr PSize   PFree 
+  /dev/ram0           lvm2 --    16.00M 16.00M
+  /dev/ram1           lvm2 --    16.00M 16.00M
+  /dev/sdb2  VolGroup lvm2 a-   297.89G     0 
+[root@localhost ~]# 
+
+Note that the new /dev/ram0 PV shows up in addition to my system drive.
+
+Using "pvdisplay" shows you much more detail:
+
+[root@localhost ~]# pvcreate /dev/ram1
+  Physical volume "/dev/ram1" successfully created
+[root@localhost ~]# pvs
+  PV         VG       Fmt  Attr PSize   PFree 
+  /dev/ram0           lvm2 --    16.00M 16.00M
+  /dev/ram1           lvm2 --    16.00M 16.00M
+  /dev/sdb2  VolGroup lvm2 a-   297.89G     0 
+[root@localhost ~]# pvdisplay
+  --- Physical volume ---
+  PV Name               /dev/sdb2
+  VG Name               VolGroup
+  PV Size               297.89 GB / not usable 2.81 MB
+  Allocatable           yes (but full)
+  PE Size (KByte)       4096
+  Total PE              76260
+  Free PE               0
+  Allocated PE          76260
+  PV UUID               m6e2np-3S2m-6t0v-Aheh-VRc9-YQKu-eJ1M3C
+   
+  "/dev/ram0" is a new physical volume of "16.00 MB"
+  --- NEW Physical volume ---
+  PV Name               /dev/ram0
+  VG Name               
+  PV Size               16.00 MB
+  Allocatable           NO
+  PE Size (KByte)       0
+  Total PE              0
+  Free PE               0
+  Allocated PE          0
+  PV UUID               NmQqgS-OhFY-8Ea6-qDDd-saxR-Dg9X-4Sw9kD
+   
+  "/dev/ram1" is a new physical volume of "16.00 MB"
+  --- NEW Physical volume ---
+  PV Name               /dev/ram1
+  VG Name               
+  PV Size               16.00 MB
+  Allocatable           NO
+  PE Size (KByte)       0
+  Total PE              0
+  Free PE               0
+  Allocated PE          0
+  PV UUID               DBYytg-WE4u-RLkN-GYTl-enPw-EXTv-pocFGI
+   
+[root@localhost ~]# 
+
+Now Let's put these two RAM disk PVs into a Volume group:
+
+[root@localhost ~]# vgcreate test_vg /dev/ram0 /dev/ram1
+  Volume group "test_vg" successfully created
+[root@localhost ~]# vgs
+  VG       #PV #LV #SN Attr   VSize   VFree 
+  VolGroup   1   2   0 wz--n- 297.89G     0 
+  test_vg    2   0   0 wz--n-  24.00M 24.00M
+[root@localhost ~]# 
+
+Once again, vgdisplay shows much more information (including my system drive VG):
+
+ot@localhost ~]# vgdisplay
+  --- Volume group ---
+  VG Name               VolGroup
+  System ID             
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               297.89 GB
+  PE Size               4.00 MB
+  Total PE              76260
+  Alloc PE / Size       76260 / 297.89 GB
+  Free  PE / Size       0 / 0   
+  VG UUID               GMzh3d-v2Ox-xFNY-mXjh-TDUO-1kV9-fgi9LP
+   
+  --- Volume group ---
+  VG Name               test_vg
+  System ID             
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  1
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               24.00 MB
+  PE Size               4.00 MB
+  Total PE              6
+  Alloc PE / Size       0 / 0   
+  Free  PE / Size       6 / 24.00 MB
+  VG UUID               MOWFEU-KSJX-eGSc-3GJs-POfA-jCWf-cMC4Bq
+   
+[root@localhost ~]# 
+
+The Total Physical Extents of a VG can be found using vgdisplay as follows:
+
+[root@localhost ~]# vgdisplay test_vg | grep "Total PE"
+  Total PE              6
+[root@localhost ~]# 
+
+Now let's stripe over these two RAM disks by creating a Logical Volume:
+(4K chunks, striping over 2 PVs, using all 6 4MB Physical Extents)
+
+[root@localhost ~]# lvcreate -i2 -I4 -l 6 -n test_lv0 test_vg
+  Logical volume "test_lv0" created
+[root@localhost ~]# lvs
+  LV       VG       Attr   LSize   Origin Snap%  Move Log Copy%  Convert
+  lv_root  VolGroup -wi-ao 294.02G                                      
+  lv_swap  VolGroup -wi-ao   3.88G                                      
+  test_lv0 test_vg  -wi-a-  24.00M                                      
+[root@localhost ~]# lvdisplay
+  --- Logical volume ---
+  LV Name                /dev/VolGroup/lv_root
+  VG Name                VolGroup
+  LV UUID                GZ35Vf-eans-cKEU-pztD-AWcf-gzCz-1URfcX
+  LV Write Access        read/write
+  LV Status              available
+  # open                 1
+  LV Size                294.02 GB
+  Current LE             75268
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:0
+   
+  --- Logical volume ---
+  LV Name                /dev/VolGroup/lv_swap
+  VG Name                VolGroup
+  LV UUID                5mMAkT-mHWL-XKXR-H1AF-aaXz-rAiR-ckiQe5
+  LV Write Access        read/write
+  LV Status              available
+  # open                 1
+  LV Size                3.88 GB
+  Current LE             992
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:1
+   
+  --- Logical volume ---
+  LV Name                /dev/test_vg/test_lv0
+  VG Name                test_vg
+  LV UUID                OgCiM6-T9W0-mY4g-xBA0-ofa2-rA6h-gXLOmY
+  LV Write Access        read/write
+  LV Status              available
+  # open                 0
+  LV Size                24.00 MB
+  Current LE             6
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           253:2
+   
+[root@localhost ~]# 
+
+</pre>
+
+</body></html>

@@ -1,0 +1,76 @@
+<html>
+<h3>All of the basic resources needed for Linux development</h3>
+<h4> <a href="http://ecee.colorado.edu/~siewerts/coursera-notes/PDF/Coursera-Linux-How-To-Docs/">Linux How-To Documents</a> </h4>
+<hr>
+
+<u>Set up your Home Lab (Raspberry Pi recommended, Jetson avanced, VB-Linux for non-RT development)</u>
+<ol>
+<li><b>REQUIRED</b>: Raspberry Pi Canakit quick start kits (accessories) - <a href="https://www.canakit.com/raspberry-pi">found here</a>
+<li>OPTIONAL: NVIDIA Jetson Nano quick start - <a href="https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit">found here</a>
+<li>OPTIONAL: Virtual Box for VM-Linux - <a href="https://www.virtualbox.org/wiki/Downloads">found here</a>
+<li>OPTIONAL: Ubuntu Linux LTS - <a href="https://ubuntu.com/download/desktop">found here</a>
+</ol>
+
+Most Linux embedded system developers use "vi" and "gdb" since they are most often built-in and available on every Linux system.  However, if you are new to Linux, you may want to access some tutorial information and/or use some alternative tools that are more visual in nature.  
+<br>
+<br>
+<u>Here are some helpful GDB resources</u>
+<ol>
+<li>Cheat Sheet - <a href="https://in-addr.nl/mirror/GDB%20Cheat%20Sheet.pdf">found here</a>
+<li>GDB Tutorial - <a href="https://www.tutorialspoint.com/gnu_debugger/gnu_debugger_tutorial.pdf">found here</a>
+<li>Other graphical debugger and development tools of interest
+<ul>
+	<li>Nemiver visual debugger - <b><i>sudo apt install nemiver</i></b>
+	<li>DDD visual debugger - <b><i>sudo apt install ddd</i></b>
+	<li><b>VS-Code for Linux</b> - <a href="https://code.visualstudio.com/download">found here</a>
+</ul>
+</ol>
+
+<u>Here are some helpful "vi" resources</u>
+<ol>
+<li>Cheat Sheet (many-use google "vi cheat sheet") - <a href="http://web.mit.edu/merolish/Public/vi-ref.pdf">found here</a>
+<li>vim Cheat Sheet - <a href="https://vimsheet.com/">found here</a>
+</ol>
+
+If you don't like command line debuggers and "vi", you may want to use VS-Code, or use a visual debugger along with simpler editors compared to vi such as:
+
+<ol>
+<li>"nano" or "pico" - normally built into Linux distributions
+<li>geany simple visual editor - <b><i>sudo apt install geany</i></b>
+<li>vim (an improved version of the built-in vi editor) - <b><i>sudo apt install vim</i></b>
+</ol>
+
+<u>Syslog is used in this class and here are some pointers</u>
+<ol>
+<li>Syslog should be used instead of "printf" in this class for final code submissions (to avoid any printf blocking and inefficiency, for system professionalism, and to learn about logging, tracing, and profiling).
+<li>Example code to show how a application posts a syslog message - <a href="http://ecee.colorado.edu/~ecen5623/ecen/ex/Linux/syslogtest.c">found here</a>
+<li>Tutorials on Unix/Linux Syslog - <a href="http://www.tutorialspoint.com/unix/unix-system-logging.htm">found here</a>
+</ol>
+
+<u>Here are some helpful "hexedit" Binary file resources</u>
+<ol>
+<li>Summary of hex editors for Linux - <a href="https://www.ubuntupit.com/best-linux-hex-editor-top-20-linux-hex-viewers-editors/">found here</a>
+<li>More hex editors for Linux - <a href="https://linuxhint.com/hex-editors-linux/">found here</a>
+<li>Windows hex editor - <a href="http://frhed.sourceforge.net/en/">found here</a>
+</ol>
+
+<pre>
+Using xxd inside VI:
+
+If you've already opened the file with vi or vim, you can use:
+
+:%!xxd
+
+Now make your changes, you need to do that on the left-hand side of the display (the hex numbers), changes to the right-hand side (printable representation) are ignored on write.
+
+To save it, use xxd -r:
+
+:%!xxd -r > new-ls
+
+This will save the file to new-ls.
+
+Or to load the binary in the current buffer:
+
+:%!xxd -r
+
+</pre>

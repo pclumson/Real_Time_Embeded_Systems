@@ -1,0 +1,37 @@
+All of the basic resources needed for Linux development
+
+http://ecee.colorado.edu/~siewerts/coursera-notes/PDF/Coursera-Linux-How-To-Docs/
+
+Set up your Home Lab (Raspberry Pi recommended, Jetson avanced, VB-Linux for non-RT development)
+
+1) Raspberry Pi Canakit quick start - https://www.canakit.com/raspberry-pi
+2) NVIDIA Jetson Nano quick start - https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit
+3) Virtual Box for VM-Linux - https://www.virtualbox.org/wiki/Downloads
+4) Ubuntu Linux LTS - https://ubuntu.com/download/desktop
+
+Most Linux embedded system developers use "vi" and "gdb" since they are most often built-in and available on
+every Linux system.  However, if you are new to Linux, you may want to access some tutorial information and/or use
+some alternative tools that are more visual in nature.
+
+Here are some helpful GDB resources
+
+1) Cheat Sheet - https://in-addr.nl/mirror/GDB%20Cheat%20Sheet.pdf
+
+2) GDB Tutorial - https://www.tutorialspoint.com/gnu_debugger/gnu_debugger_tutorial.pdf
+
+3) Other graphical debugger and development tools of interest
+
+	a) Nemiver visual debugger - sudo apt install nemiver
+	b) DDD visual debugger - sudo apt install ddd
+	c) VS-Code for Linux - https://code.visualstudio.com/download
+
+Here are some helpful "vi" resources
+
+1) Cheat Sheet (many out there - use google and vi cheat sheet) - http://web.mit.edu/merolish/Public/vi-ref.pdf
+2) vim Cheat Sheet - https://vimsheet.com/
+
+If you don't like command line debuggers and "vi", you may want to use VS-Code, or use a visual debugger along with simpler editors compared to vi such as:
+
+1) "nano" or "pico" - normally built into Linux distributions
+2) geany - simple visual editor
+3) vim - sudo apt install vim - an improved version of the built-in vi editor

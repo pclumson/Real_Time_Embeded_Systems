@@ -1,0 +1,18 @@
+Methods to minimize Xorg interference for RTES and control run-levels
+
+Check run level with: "runlevel" and see man runlevel
+
+1) Enable SSH in R-Pi configuration and then SSH into R-Pi using a 192.168.x.x address and direct link, no monitor, keyboard or mouse
+
+2) Ctl + Alt + F1...F6 for terminal only (close all windows before you do this)
+   Ctl + Alt + F7 to go back to graphics
+
+3) sudo init 1  -- requires root login with Alt + Ctl + F1
+   sudo init 3  -- default user who issued, no multi-user, multi-programming
+   sudo init 5  -- normal mode
+   sudo init 6  -- reboot
+
+4) sudo systemctl isolate multi-user.target [similar to sudo init 3]
+   sudo systemctl isolate graphical.target  [similar to sudo init 5]
+
+5) reboot or shutdown now [similar to sudo init 6]
